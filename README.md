@@ -1,18 +1,95 @@
-# Sistema de Orientación Vocacional - Ciudad Bolívar
+```markdown
 
-Sistema web para análisis vocacional de estudiantes mediante procesamiento de Excel y generación de reportes PDF.
+# 📄 README: Sistema Automatizado de Orientación Vocacional (Chikaná)
 
-## Características
+**Autor:** Daniel Andrés Dávila Lesmes  
+**Contacto:** danielandresd998@gmail.com  
+**Versión:** 01  
+**Fecha:** 2025 - 11  
 
-- 📊 Procesamiento de archivos Excel con respuestas de encuestas
-- 🤖 Análisis con IA (DeepSeek) para recomendaciones personalizadas
-- 📄 Generación de PDFs (corto y detallado)
-- 📧 Envío masivo de emails
-- 🎯 Contextualizado para Ciudad Bolívar, Bogotá
+---
 
-## Instalación
+## 🚀 Descripción del Proyecto
 
-1. Clonar repositorio:
+Este proyecto es una herramienta de automatización diseñada para la **orientación vocacional integral** de jóvenes en contextos de vulnerabilidad, específicamente adaptada para la localidad de Ciudad Bolívar, Bogotá. El sistema sistematiza intereses y aptitudes mediante un proceso ETL (Extracción, Transformación y Carga), analiza perfiles mediante Inteligencia Artificial y genera reportes personalizados de rutas educativas.
+
+### Características Clave
+
+* **Procesamiento de Datos:** Ingesta y normalización de más de 45 variables de formularios de estudiantes, procesando información masiva de manera eficiente[cite: 10].
+* **Análisis Híbrido (IA + Heurística):** El motor `AIAnalyzer` utiliza Gemini 2.0 Flash para análisis profundo, con un sistema de *fallback* robusto basado en lógica heurística que garantiza la continuidad del servicio[cite: 9].
+* **Anonimización y Ética:** El sistema procesa exclusivamente variables de perfil, excluyendo datos personales sensibles (nombres, teléfonos, correos) de las peticiones a la IA, garantizando la privacidad[cite: 9].
+* **Reportes Multiformato:** Generación automática de informes en PDF, TXT y HTML, organizados por sesiones y comprimidos en archivos `.zip` para facilitar su entrega[cite: 11, 12].
+
+---
+
+## 🛡️ Declaración de Privacidad y Ética
+
+Para garantizar la seguridad de los jóvenes participantes, el sistema ha sido diseñado bajo los siguientes principios:
+
+* **Anonimización Estricta:** Antes de cualquier interacción con modelos de IA, se eliminan los identificadores personales, trabajando únicamente con datos de intereses, aptitudes y entorno socioeconómico[cite: 9].
+* **Guía Técnica (No Mandatoria):** El informe generado actúa como una **guía técnica complementaria**. Se enfatiza que las recomendaciones no son definitivas y deben ser validadas en espacios de reflexión profesional[cite: 11].
+* **Gestión Segura:** Los datos se procesan en directorios temporales (`/temp`) que aseguran que la información sensible no persista innecesariamente en el servidor[cite: 12].
+
+---
+
+## 🏗️ Estructura del Proyecto
+
+El proyecto sigue una arquitectura modular centrada en el despliegue de un servicio Flask:
+
+```text
+/
+├── app.py                # Orquestador central (Flask)
+├── /src
+│   ├── excel_processor.py # Ingesta y limpieza de datos (ETL)[cite: 10]
+│   ├── ai_analyzer.py    # Lógica de IA y perfiles vocacionales[cite: 9]
+│   └── pdf_generator.py  # Generación de reportes[cite: 11]
+├── /temp                 # Directorios de trabajo seguros
+├── requirements.txt      # Dependencias del proyecto
+└── README.md
+
+```
+
+---
+
+## ⚙️ Prerrequisitos e Instalación
+
+Para ejecutar el sistema localmente:
+
+1. **Requisitos:** Python 3.9+, Flask, Pandas, FPDF2, Google Generative AI.
+
+
+2. **Instalación de dependencias:**
 ```bash
-git clone https://github.com/tu-usuario/orientacion-vocacional.git
-cd orientacion-vocacional
+pip install -r requirements.txt
+
+```
+
+
+3. **Configuración:** Crea un archivo `.env` en la raíz con tu clave de API:
+```env
+GEMINI_API_KEY=tu_api_key_aqui
+
+```
+
+
+4. **Ejecución:**
+```bash
+python app.py
+
+```
+
+
+
+---
+
+## 📊 Metodología de Evaluación
+
+El sistema clasifica a los estudiantes en perfiles (ej. Tecnológico-Digital, Socio-Humanístico, Científico-Analítico) basándose en un sistema de *scoring* sobre sus actividades, materias y habilidades identificadas. Esta clasificación permite al sistema sugerir rutas educativas que van desde niveles **técnicos y tecnológicos (SENA)** hasta **profesionales (Universidades Públicas)**, fomentando la articulación educativa.
+
+---
+
+**Copyright © 2026. Todos los derechos reservados.**
+
+```
+
+```
