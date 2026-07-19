@@ -1,6 +1,5 @@
-```markdown
 
-# 📄 README: Sistema Automatizado de Orientación Vocacional (Chikaná)
+# 📄 Sistema Automatizado de Orientación Vocacional (Chikaná)
 
 **Autor:** Daniel Andrés Dávila Lesmes  
 **Contacto:** danielandresd998@gmail.com  
@@ -15,10 +14,10 @@ Este proyecto es una herramienta de automatización diseñada para la **orientac
 
 ### Características Clave
 
-* **Procesamiento de Datos:** Ingesta y normalización de más de 45 variables de formularios de estudiantes, procesando información masiva de manera eficiente[cite: 10].
-* **Análisis Híbrido (IA + Heurística):** El motor `AIAnalyzer` utiliza Gemini 2.0 Flash para análisis profundo, con un sistema de *fallback* robusto basado en lógica heurística que garantiza la continuidad del servicio[cite: 9].
-* **Anonimización y Ética:** El sistema procesa exclusivamente variables de perfil, excluyendo datos personales sensibles (nombres, teléfonos, correos) de las peticiones a la IA, garantizando la privacidad[cite: 9].
-* **Reportes Multiformato:** Generación automática de informes en PDF, TXT y HTML, organizados por sesiones y comprimidos en archivos `.zip` para facilitar su entrega[cite: 11, 12].
+* **Procesamiento de Datos:** Ingesta y normalización de más de 45 variables de formularios de estudiantes, procesando información masiva de manera eficiente.
+* **Análisis Híbrido (IA + Heurística):** El motor `AIAnalyzer` utiliza Gemini 2.0 Flash para análisis profundo, con un sistema de *fallback* robusto basado en lógica heurística que garantiza la continuidad del servicio.
+* **Anonimización y Ética:** El sistema procesa exclusivamente variables de perfil, excluyendo datos personales sensibles (nombres, teléfonos, correos) de las peticiones a la IA, garantizando la privacidad.
+* **Reportes Multiformato:** Generación automática de informes en PDF, TXT y HTML, organizados por sesiones y comprimidos en archivos `.zip` para facilitar su entrega.
 
 ---
 
@@ -26,9 +25,9 @@ Este proyecto es una herramienta de automatización diseñada para la **orientac
 
 Para garantizar la seguridad de los jóvenes participantes, el sistema ha sido diseñado bajo los siguientes principios:
 
-* **Anonimización Estricta:** Antes de cualquier interacción con modelos de IA, se eliminan los identificadores personales, trabajando únicamente con datos de intereses, aptitudes y entorno socioeconómico[cite: 9].
-* **Guía Técnica (No Mandatoria):** El informe generado actúa como una **guía técnica complementaria**. Se enfatiza que las recomendaciones no son definitivas y deben ser validadas en espacios de reflexión profesional[cite: 11].
-* **Gestión Segura:** Los datos se procesan en directorios temporales (`/temp`) que aseguran que la información sensible no persista innecesariamente en el servidor[cite: 12].
+* **Anonimización Estricta:** Antes de cualquier interacción con modelos de IA, se eliminan los identificadores personales, trabajando únicamente con datos de intereses, aptitudes y entorno socioeconómico.
+* **Guía Técnica (No Mandatoria):** El informe generado actúa como una **guía técnica complementaria**. Se enfatiza que las recomendaciones no son definitivas y deben ser validadas en espacios de reflexión profesional.
+* **Gestión Segura:** Los datos se procesan en directorios temporales (`/temp`) que aseguran que la información sensible no persista innecesariamente en el servidor.
 
 ---
 
@@ -39,12 +38,18 @@ El proyecto sigue una arquitectura modular centrada en el despliegue de un servi
 ```text
 /
 ├── app.py                # Orquestador central (Flask)
-├── /src
-│   ├── excel_processor.py # Ingesta y limpieza de datos (ETL)[cite: 10]
-│   ├── ai_analyzer.py    # Lógica de IA y perfiles vocacionales[cite: 9]
-│   └── pdf_generator.py  # Generación de reportes[cite: 11]
+├── /src                  # Lógica de negocio (ETL, IA, PDFs)
+│   ├── ai_analyzer.py    # Análisis de perfiles y rutas
+│   ├── excel_processor.py # Ingesta de datos
+│   ├── pdf_generator.py  # Generación de reportes
+│   └── email_sender.py   # Módulo de notificaciones
+├── /static               # Recursos frontend
+│   ├── /css              # Hojas de estilo
+│   ├── /js               # Scripts de cliente
+│   └── /images           # Recursos gráficos
+├── /templates            # Interfaz web (Jinja2)
 ├── /temp                 # Directorios de trabajo seguros
-├── requirements.txt      # Dependencias del proyecto
+├── .env                  # Configuración de variables de entorno
 └── README.md
 
 ```
