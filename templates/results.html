@@ -1,0 +1,604 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="min-vh-100 bg-light">
+    <!-- Header de Resultados -->
+    <div class="bg-white py-5 shadow-sm">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="display-4 fw-bold text-primary mb-2">
+                        <i class="fas fa-chart-line me-3"></i>
+                        Resultados del Análisis
+                    </h1>
+                    <p class="lead text-muted">
+                        Análisis vocacional personalizado para {{ total_students }} estudiantes
+                    </p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="btn-group">
+                        <a href="/download-html/{{ session_id }}" class="btn btn-success btn-modern">
+                            <i class="fas fa-download me-2"></i>
+                            Descargar Todo
+                        </a>
+                        <a href="{{ url_for('index') }}" class="btn btn-outline-primary btn-modern">
+                            <i class="fas fa-home me-2"></i>
+                            Inicio
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección de Descargas -->
+    <div class="container mt-4">
+        <div class="download-section" style="margin: 20px 0; padding: 20px; background: #f8f9fa; border-radius: 8px; border: 2px dashed #dee2e6;">
+            <h3 class="text-center mb-4">📥 Exportar Resultados</h3>
+            <div class="download-buttons" style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+                <a href="/download-html/{{ session_id }}" class="btn btn-success">
+                    🌐 Descargar HTML
+                </a>
+                <a href="/download-json/{{ session_id }}" class="btn btn-info">
+                    📊 Descargar JSON
+                </a>
+                <a href="/download-txt/{{ session_id }}" class="btn btn-warning">
+                    📄 Descargar Texto
+                </a>
+                <a href="/generate-pdfs/{{ session_id }}" class="btn btn-danger">
+                    📑 Generar PDFs
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas Generales -->
+    <div class="container mt-4">
+        <div class="row g-4">
+            <div class="col-md-3">
+                <div class="card-modern text-center">
+                    <div class="card-body">
+                        <div class="icon-circle bg-primary mx-auto mb-3">
+                            <i class="fas fa-users text-white"></i>
+                        </div>
+                        <h3 class="text-primary">{{ total_students }}</h3>
+                        <p class="text-muted mb-0">Estudiantes Analizados</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card-modern text-center">
+                    <div class="card-body">
+                        <div class="icon-circle bg-success mx-auto mb-3">
+                            <i class="fas fa-check text-white"></i>
+                        </div>
+                        <h3 class="text-success">{{ results|selectattr('success')|list|length }}</h3>
+                        <p class="text-muted mb-0">Análisis Exitosos</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card-modern text-center">
+                    <div class="card-body">
+                        <div class="icon-circle bg-info mx-auto mb-3">
+                            <i class="fas fa-brain text-white"></i>
+                        </div>
+                        <h3 class="text-info">{{ results|selectattr('source', 'equalto', 'gemini_ai')|list|length }}</h3>
+                        <p class="text-muted mb-0">Con Inteligencia Artificial</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card-modern text-center">
+                    <div class="card-body">
+                        <div class="icon-circle bg-warning mx-auto mb-3">
+                            <i class="fas fa-graduation-cap text-white"></i>
+                        </div>
+                        <h3 class="text-warning">{{ total_careers }}</h3>
+                        <p class="text-muted mb-0">Carreras Recomendadas</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de Estudiantes -->
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-12">
+                <div class="card-modern">
+                    <div class="card-header-modern">
+                        <h3 class="mb-0">
+                            <i class="fas fa-user-graduate me-2"></i>
+                            Estudiantes Analizados
+                        </h3>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="list-group list-group-flush">
+                            {% for result in results %}
+                            <div class="list-group-item fade-in">
+                                <div class="row align-items-center">
+                                    <div class="col-md-6">
+                                        <h5 class="mb-1">
+                                            {{ result.nombre }}
+                                            {% if result.source and 'gemini' in result.source %}
+                                            <span class="badge bg-success badge-vocacional ms-2">
+                                                <i class="fas fa-robot me-1"></i>IA
+                                            </span>
+                                            {% else %}
+                                            <span class="badge bg-info badge-vocacional ms-2">
+                                                <i class="fas fa-magic me-1"></i>Sistema
+                                            </span>
+                                            {% endif %}
+                                        </h5>
+                                        <p class="text-muted mb-1">
+                                            <i class="fas fa-map-marker-alt me-1"></i>
+                                            {{ result.localidad }} • 
+                                            <i class="fas fa-id-card me-1"></i>
+                                            {{ result.student_id }}
+                                        </p>
+                                        <div class="mt-2">
+                                            {% if result.analysis_parsed and result.analysis_parsed.carreras_recomendadas %}
+                                                {% for carrera in result.analysis_parsed.carreras_recomendadas[:2] %}
+                                                <span class="badge bg-light text-dark me-1">
+                                                    {{ carrera.split(' - ')[0] if ' - ' in carrera else carrera }}
+                                                </span>
+                                                {% endfor %}
+                                            {% else %}
+                                                <span class="badge bg-warning">Sin análisis disponible</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 text-end">
+                                        <div class="btn-group">
+                                            <button class="btn btn-primary btn-sm" 
+                                                    onclick="showStudentDetails('{{ result.student_id }}')">
+                                                <i class="fas fa-eye me-1"></i>
+                                                Ver Detalles
+                                            </button>
+                                            <button class="btn btn-success btn-sm" 
+                                                    onclick="downloadStudentPDF('{{ result.student_id }}', '{{ result.nombre }}')">
+                                                <i class="fas fa-file-pdf me-1"></i>
+                                                PDF
+                                            </button>
+                                            <button class="btn btn-info btn-sm" 
+                                                    onclick="downloadStudentText('{{ result.student_id }}', '{{ result.nombre }}')">
+                                                <i class="fas fa-file-alt me-1"></i>
+                                                Texto
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Detalles del Estudiante -->
+    <div class="modal fade" id="studentModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="studentModalTitle">
+                        <i class="fas fa-user-graduate me-2"></i>
+                        Detalles del Estudiante
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="studentModalBody">
+                    <!-- Contenido dinámico -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-success" id="downloadFromModal">
+                        <i class="fas fa-download me-1"></i>
+                        Descargar Reporte
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.download-buttons .btn {
+    padding: 10px 15px;
+    text-decoration: none;
+    border-radius: 5px;
+    color: white;
+    font-weight: bold;
+    transition: all 0.3s;
+    border: none;
+    cursor: pointer;
+}
+
+.download-buttons .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.btn-success { background: #28a745; }
+.btn-info { background: #17a2b8; }
+.btn-warning { background: #ffc107; color: #000 !important; }
+.btn-danger { background: #dc3545; }
+
+.student-detail-card {
+    border-left: 4px solid #007bff;
+    background: #f8f9fa;
+}
+
+.career-item {
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.career-item:hover {
+    background: #e3f2fd;
+    transform: translateX(5px);
+}
+
+.perfil-badge {
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+}
+
+.icon-circle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.btn-group .btn {
+    margin: 0 2px;
+}
+
+/* Estilos mejorados para el modal */
+.career-card {
+    border: 1px solid #e3f2fd;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.career-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    border-color: #2196f3;
+}
+
+.career-description {
+    font-size: 0.85rem;
+    color: #666;
+    line-height: 1.4;
+}
+
+.institution-item {
+    padding: 8px 12px;
+    border-radius: 6px;
+    background: #f8f9fa;
+    border-left: 3px solid #4caf50;
+}
+</style>
+
+<script>
+// Variable global para almacenar el estudiante actual del modal
+let currentStudentId = null;
+
+// Datos de estudiantes para el modal
+const studentData = {
+    {% for result in results %}
+    '{{ result.student_id }}': {
+        nombre: `{{ result.nombre }}`,
+        edad: `{{ result.edad or 'N/A' }}`,
+        localidad: `{{ result.localidad or 'N/A' }}`,
+        estrato: `{{ result.estrato or 'N/A' }}`,
+        perfil: `{{ result.analysis_parsed.perfil_detectado if result.analysis_parsed and result.analysis_parsed.perfil_detectado else 'Evaluación vocacional robusta' }}`,
+        descripcion: `{{ result.analysis_parsed.descripcion_perfil if result.analysis_parsed and result.analysis_parsed.descripcion_perfil else 'Análisis basado en patrones de intereses y habilidades' }}`,
+        carreras: {{ result.analysis_parsed.carreras_recomendadas | tojson if result.analysis_parsed and result.analysis_parsed.carreras_recomendadas else [] }},
+        instituciones: {{ result.analysis_parsed.instituciones_sugeridas | tojson if result.analysis_parsed and result.analysis_parsed.instituciones_sugeridas else [] }},
+        source: `{{ result.source or 'N/A' }}`,
+        analysis_raw: `{{ result.analysis_raw or 'Análisis no disponible' }}`
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+};
+
+function escapeHtml(text) {
+    if (!text) return '';
+    var map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    };
+    return text.toString().replace(/[&<>"']/g, function(m) { return map[m]; });
+}
+
+function showStudentDetails(studentId) {
+    console.log('🔍 Mostrando detalles para:', studentId);
+    currentStudentId = studentId;
+    const data = studentData[studentId];
+    
+    if (!data) {
+        alert('No se encontraron datos para este estudiante');
+        return;
+    }
+
+    const modalBody = document.getElementById('studentModalBody');
+    const modalTitle = document.getElementById('studentModalTitle');
+    
+    modalTitle.innerHTML = `<i class="fas fa-user-graduate me-2"></i>${escapeHtml(data.nombre)}`;
+    
+    // Configurar el botón de descarga del modal
+    const downloadBtn = document.getElementById('downloadFromModal');
+    downloadBtn.onclick = function() {
+        downloadStudentText(studentId, data.nombre);
+    };
+    
+    // MEJORA: Manejar mejor las descripciones de carreras
+    const carrerasHTML = data.carreras && data.carreras.length > 0 
+        ? data.carreras.map((carrera, index) => {
+            let carreraNombre = '';
+            let carreraDescripcion = '';
+            
+            if (typeof carrera === 'string') {
+                if (carrera.includes(' - ')) {
+                    const parts = carrera.split(' - ');
+                    carreraNombre = escapeHtml(parts[0].trim());
+                    carreraDescripcion = escapeHtml(parts.slice(1).join(' - ').trim());
+                } else if (carrera.includes(':')) {
+                    const parts = carrera.split(':');
+                    carreraNombre = escapeHtml(parts[0].trim());
+                    carreraDescripcion = escapeHtml(parts.slice(1).join(':').trim());
+                } else {
+                    carreraNombre = escapeHtml(carrera);
+                    carreraDescripcion = 'Esta carrera se adapta a tu perfil vocacional identificado. Se recomienda investigar más sobre los planes de estudio y oportunidades laborales.';
+                }
+            } else {
+                carreraNombre = escapeHtml(carrera);
+                carreraDescripcion = 'Esta carrera se adapta a tu perfil vocacional identificado.';
+            }
+            
+            return `
+                <div class="col-md-6 mb-3">
+                    <div class="career-card p-3 h-100">
+                        <div class="d-flex align-items-start mb-2">
+                            <span class="badge bg-primary me-2 mt-1">${index + 1}</span>
+                            <h6 class="mb-0 text-dark">${carreraNombre}</h6>
+                        </div>
+                        <p class="career-description mb-2">${carreraDescripcion}</p>
+                        <small class="text-info">
+                            <i class="fas fa-lightbulb me-1"></i>
+                            Compatible con tu perfil
+                        </small>
+                    </div>
+                </div>
+            `;
+        }).join('')
+        : '<div class="col-12"><div class="alert alert-warning text-center">No hay carreras recomendadas disponibles.</div></div>';
+
+    // MEJORA: Manejar mejor las instituciones
+    const institucionesHTML = data.instituciones && data.instituciones.length > 0
+        ? data.instituciones.map(institucion => {
+            let institucionNombre = '';
+            let detalles = '';
+            
+            if (typeof institucion === 'string') {
+                if (institucion.includes(' - ')) {
+                    const parts = institucion.split(' - ');
+                    institucionNombre = escapeHtml(parts[0].trim());
+                    detalles = escapeHtml(parts.slice(1).join(' - ').trim());
+                } else if (institucion.includes(':')) {
+                    const parts = institucion.split(':');
+                    institucionNombre = escapeHtml(parts[0].trim());
+                    detalles = escapeHtml(parts.slice(1).join(':').trim());
+                } else {
+                    institucionNombre = escapeHtml(institucion);
+                    detalles = 'Institución educativa recomendada para tu perfil';
+                }
+            } else {
+                institucionNombre = escapeHtml(institucion);
+                detalles = 'Institución educativa recomendada';
+            }
+            
+            return `
+                <div class="col-md-6 mb-2">
+                    <div class="institution-item">
+                        <div class="fw-bold text-success">${institucionNombre}</div>
+                        ${detalles ? `<small class="text-muted">${detalles}</small>` : ''}
+                    </div>
+                </div>
+            `;
+        }).join('')
+        : '<div class="col-12"><div class="alert alert-warning text-center">No hay instituciones sugeridas disponibles.</div></div>';
+
+    // MEJORA: Contenido del modal más completo
+    modalBody.innerHTML = `
+        <div class="student-analysis-detail">
+            <div class="row">
+                <!-- Información Personal -->
+                <div class="col-md-6">
+                    <div class="card student-detail-card mb-4">
+                        <div class="card-body">
+                            <h6 class="card-title text-primary">
+                                <i class="fas fa-info-circle me-2"></i>Información Personal
+                            </h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-borderless">
+                                    <tr>
+                                        <td class="fw-bold" width="40%">Edad:</td>
+                                        <td>${escapeHtml(data.edad)} años</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold">Localidad:</td>
+                                        <td>${escapeHtml(data.localidad)}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold">Estrato:</td>
+                                        <td>${escapeHtml(data.estrato)}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold">Fuente:</td>
+                                        <td>
+                                            <span class="badge ${data.source.includes('gemini') ? 'bg-success' : 'bg-info'}">
+                                                ${escapeHtml(data.source)}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Perfil Vocacional -->
+                <div class="col-md-6">
+                    <div class="card student-detail-card mb-4">
+                        <div class="card-body">
+                            <h6 class="card-title text-primary">
+                                <i class="fas fa-chart-bar me-2"></i>Perfil Detectado
+                            </h6>
+                            <div class="mb-2">
+                                <span class="badge perfil-badge bg-primary">${escapeHtml(data.perfil)}</span>
+                            </div>
+                            <p class="mb-0 small text-muted">${escapeHtml(data.descripcion)}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Carreras Recomendadas -->
+            <div class="card mb-4 border-success">
+                <div class="card-header bg-success text-white">
+                    <h6 class="mb-0">
+                        <i class="fas fa-graduation-cap me-2"></i>
+                        Carreras Recomendadas
+                        <span class="badge bg-light text-success ms-2">${data.carreras ? data.carreras.length : 0}</span>
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        ${carrerasHTML}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Instituciones Sugeridas -->
+            <div class="card border-info">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0">
+                        <i class="fas fa-university me-2"></i>
+                        Instituciones Sugeridas
+                        <span class="badge bg-light text-info ms-2">${data.instituciones ? data.instituciones.length : 0}</span>
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        ${institucionesHTML}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Análisis Original (solo si existe) -->
+            ${data.analysis_raw && data.analysis_raw !== 'Análisis no disponible' ? `
+            <div class="mt-4">
+                <div class="card border-secondary">
+                    <div class="card-header bg-secondary text-white">
+                        <h6 class="mb-0">
+                            <i class="fas fa-file-code me-2"></i>
+                            Análisis Original
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div style="max-height: 200px; overflow-y: auto; background: #f8f9fa; padding: 1rem; border-radius: 5px;">
+                            <pre class="mb-0 small" style="white-space: pre-wrap; font-family: 'Courier New', monospace;">${escapeHtml(data.analysis_raw)}</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            ` : ''}
+        </div>
+    `;
+
+    // Mostrar el modal
+    const modal = new bootstrap.Modal(document.getElementById('studentModal'));
+    modal.show();
+}
+
+// Función para descargar PDF individual (placeholder por ahora)
+function downloadStudentPDF(studentId, studentName) {
+    alert(`Función PDF individual en desarrollo para: ${studentName}`);
+    // Aquí puedes implementar la generación de PDF individual
+    // window.location.href = `/download-student-pdf/${studentId}`;
+}
+
+// Función para descargar texto individual
+function downloadStudentText(studentId, studentName) {
+    const data = studentData[studentId];
+    if (!data) {
+        alert('No se encontraron datos para este estudiante');
+        return;
+    }
+
+    // Generar contenido de texto
+    let textContent = `REPORTE DE ORIENTACIÓN VOCACIONAL\n`;
+    textContent += `=====================================\n\n`;
+    textContent += `ESTUDIANTE: ${data.nombre}\n`;
+    textContent += `Edad: ${data.edad} años\n`;
+    textContent += `Localidad: ${data.localidad}\n`;
+    textContent += `Estrato: ${data.estrato}\n`;
+    textContent += `Perfil: ${data.perfil}\n`;
+    textContent += `Fuente: ${data.source}\n\n`;
+    
+    textContent += `DESCRIPCIÓN DEL PERFIL:\n`;
+    textContent += `${data.descripcion}\n\n`;
+    
+    textContent += `CARRERAS RECOMENDADAS:\n`;
+    if (data.carreras && data.carreras.length > 0) {
+        data.carreras.forEach((carrera, index) => {
+            textContent += `${index + 1}. ${carrera}\n`;
+        });
+    } else {
+        textContent += `No hay carreras recomendadas disponibles.\n`;
+    }
+    
+    textContent += `\nINSTITUCIONES SUGERIDAS:\n`;
+    if (data.instituciones && data.instituciones.length > 0) {
+        data.instituciones.forEach((institucion, index) => {
+            textContent += `${index + 1}. ${institucion}\n`;
+        });
+    } else {
+        textContent += `No hay instituciones sugeridas disponibles.\n`;
+    }
+    
+    textContent += `\nANÁLISIS COMPLETO:\n`;
+    textContent += `${data.analysis_raw}\n`;
+
+    // Crear y descargar archivo
+    const blob = new Blob([textContent], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `orientacion_${studentName.replace(/\s+/g, '_')}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+}
+</script>
+{% endblock %}

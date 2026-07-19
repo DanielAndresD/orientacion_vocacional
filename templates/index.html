@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="welcome-section">
+    <h2>Bienvenido al Sistema de Orientación Vocacional</h2>
+    <p>Procesa encuestas de estudiantes y genera reportes personalizados</p>
+    
+    <div class="actions">
+        <a href="{{ url_for('upload') }}" class="btn btn-primary">
+            📤 Subir Excel de Estudiantes
+        </a>
+    </div>
+</div>
+
+<div class="features">
+
+    <div class="feature-card">
+        <h3>🤖 Análisis con IA</h3>
+        <p>Análisis personalizado con Gemini AI para cada estudiante</p>
+    </div>
+    <div class="feature-card">
+        <h3>📄 Generación de informe en formato texto</h3>
+        <p>Reportes cortos y detallados para cada estudiante</p>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,269 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="min-vh-100 bg-light py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <!-- Header -->
+                <div class="text-center mb-5">
+                    <h1 class="display-4 fw-bold text-primary mb-3">
+                        <i class="fas fa-file-upload me-3"></i>
+                        Subir Archivo Excel
+                    </h1>
+                    <p class="lead text-muted">
+                        Carga el archivo Excel con las respuestas de los estudiantes para el análisis vocacional
+                    </p>
+                </div>
+
+                <!-- Área de Upload -->
+                <div class="card-modern">
+                    <div class="card-body p-5">
+                        <div class="upload-area" id="uploadArea">
+                            <div class="upload-content">
+                                <div class="upload-icon">
+                                    <i class="fas fa-file-excel"></i>
+                                </div>
+                                <h3 class="text-primary mb-3">Arrastra tu archivo Excel aquí</h3>
+                                <p class="text-muted mb-4">o haz clic para seleccionar</p>
+                                <input type="file" id="fileInput" accept=".xlsx,.xls" hidden>
+                                <button class="btn btn-primary btn-modern" onclick="document.getElementById('fileInput').click()">
+                                    <i class="fas fa-folder-open me-2"></i>
+                                    Seleccionar Archivo
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Información de requisitos -->
+                <div class="card-modern mt-4">
+                    <div class="card-header-modern">
+                        <h4 class="mb-0">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Requisitos del Archivo
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <ul class="list-unstyled">
+                                    <li class="mb-2">
+                                        <i class="fas fa-check text-success me-2"></i>
+                                        Formato Excel (.xlsx o .xls)
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="fas fa-check text-success me-2"></i>
+                                        Columnas del formulario vocacional
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="fas fa-check text-success me-2"></i>
+                                        Máximo 16MB de tamaño
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <ul class="list-unstyled">
+                                    <li class="mb-2">
+                                        <i class="fas fa-check text-success me-2"></i>
+                                        Datos de estudiantes completos
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="fas fa-check text-success me-2"></i>
+                                        Respuestas de las 45 preguntas
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="fas fa-check text-success me-2"></i>
+                                        Información de contacto válida
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Información de procesamiento -->
+                <div id="processingInfo" class="text-center mt-4" style="display: none;">
+                    <div class="card-modern">
+                        <div class="card-body py-5">
+                            <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;" role="status">
+                                <span class="visually-hidden">Procesando...</span>
+                            </div>
+                            <h4 class="text-primary">Procesando archivo</h4>
+                            <p class="text-muted">Esto puede tomar unos minutos. Por favor, espera...</p>
+                            <div class="progress mt-3" style="height: 8px;">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resultados -->
+                <div id="results" class="mt-4" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const uploadArea = document.getElementById('uploadArea');
+const fileInput = document.getElementById('fileInput');
+const processingInfo = document.getElementById('processingInfo');
+const resultsDiv = document.getElementById('results');
+
+// Drag and drop functionality
+uploadArea.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadArea.classList.add('dragover');
+});
+
+uploadArea.addEventListener('dragleave', () => {
+    uploadArea.classList.remove('dragover');
+});
+
+uploadArea.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadArea.classList.remove('dragover');
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+        handleFile(files[0]);
+    }
+});
+
+fileInput.addEventListener('change', (e) => {
+    if (e.target.files.length > 0) {
+        handleFile(e.target.files[0]);
+    }
+});
+
+function handleFile(file) {
+    if (!file.name.match(/\.(xlsx|xls)$/)) {
+        showError('Por favor, sube un archivo Excel válido (.xlsx o .xls)');
+        return;
+    }
+
+    // Validar tamaño (16MB)
+    if (file.size > 16 * 1024 * 1024) {
+        showError('El archivo es demasiado grande. Máximo 16MB.');
+        return;
+    }
+
+    // Mostrar información de procesamiento
+    processingInfo.style.display = 'block';
+    resultsDiv.style.display = 'none';
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    fetch('/process', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        processingInfo.style.display = 'none';
+        
+        if (data.success) {
+            showSuccess(data);
+        } else {
+            showError(data.error);
+        }
+    })
+    .catch(error => {
+        processingInfo.style.display = 'none';
+        showError('Error de conexión: ' + error.message);
+    });
+}
+
+function showSuccess(data) {
+    resultsDiv.innerHTML = `
+        <div class="card-modern">
+            <div class="card-body text-center py-5">
+                <div class="mb-4">
+                    <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
+                </div>
+                <h3 class="text-success mb-4">${data.message}</h3>
+                
+                <div class="row justify-content-center mb-4">
+                    <div class="col-md-3 mb-3">
+                        <div class="card text-center border-0 bg-light">
+                            <div class="card-body py-3">
+                                <h4 class="text-primary mb-1">${data.stats.total_estudiantes}</h4>
+                                <small class="text-muted">Estudiantes</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card text-center border-0 bg-light">
+                            <div class="card-body py-3">
+                                <h4 class="text-success mb-1">${data.stats.analisis_exitosos}</h4>
+                                <small class="text-muted">Análisis Exitosos</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card text-center border-0 bg-light">
+                            <div class="card-body py-3">
+                                <h4 class="text-info mb-1">${data.stats.analisis_gemini}</h4>
+                                <small class="text-muted">Con IA</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <button class="btn btn-primary btn-lg btn-modern" onclick="window.location.href='${data.redirect_url}'">
+                        <i class="fas fa-chart-line me-2"></i>
+                        Ver Resultados en HTML
+                    </button>
+                    <button class="btn btn-outline-secondary btn-lg ms-2" onclick="window.location.href='/upload'">
+                        <i class="fas fa-upload me-2"></i>
+                        Subir Otro Archivo
+                    </button>
+                </div>
+                
+                ${data.sample_analysis ? `
+                    <div class="mt-5 text-start">
+                        <h5 class="text-primary mb-3">
+                            <i class="fas fa-user-graduate me-2"></i>
+                            Ejemplo de Análisis
+                        </h5>
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h6>${data.sample_analysis.nombre}</h6>
+                                <p class="text-muted mb-2">Carreras recomendadas:</p>
+                                <ul class="mb-0">
+                                    ${data.sample_analysis.analysis_parsed.carreras_recomendadas.map(carrera => `
+                                        <li>${carrera}</li>
+                                    `).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                ` : ''}
+            </div>
+        </div>
+    `;
+    resultsDiv.style.display = 'block';
+}
+
+function showError(error) {
+    resultsDiv.innerHTML = `
+        <div class="card-modern border-danger">
+            <div class="card-body text-center py-5">
+                <div class="mb-4">
+                    <i class="fas fa-exclamation-circle text-danger" style="font-size: 4rem;"></i>
+                </div>
+                <h4 class="text-danger mb-3">Error</h4>
+                <p class="text-muted">${error}</p>
+                <button class="btn btn-primary mt-3" onclick="window.location.href='/upload'">
+                    <i class="fas fa-redo me-2"></i>
+                    Intentar Nuevamente
+                </button>
+            </div>
+        </div>
+    `;
+    resultsDiv.style.display = 'block';
+}
+</script>
+{% endblock %}
